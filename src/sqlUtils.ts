@@ -154,3 +154,38 @@ export function update(
     [id, ...real_values],
   ];
 }
+
+export const randStr = (length: number = 10) => {
+  let id = "";
+  for (let i = 0; i < Math.ceil(length / 10); i++) {
+    id += rand_string();
+  }
+  return id.substring(0, length);
+};
+
+export const sequential_id = () => {
+  const now = Date.now();
+  return now.toString(36);
+};
+
+export const uuid = (size: "short" | "long" = "long", prefix = ""): string => {
+  let random_string = "";
+  const length = size === "short" ? 8 : 16;
+  for (let i = prefix.length; i < length; i++) {
+    random_string += randChar();
+  }
+  const nonPrefixId = random_string.substring(0, length - prefix.length);
+  if (
+    (prefix.length === 0 || prefix[prefix.length - 1] === ".") &&
+    /\d/.test(nonPrefixId[0])
+  ) {
+    return uuid(size, prefix);
+  }
+  const shortenedId = prefix + nonPrefixId;
+  return shortenedId;
+};
+
+export const randChar = () =>
+  "abcdefghijklmnopqrstuvwxyz0123456789"[Math.floor(Math.random() * 36)];
+
+const rand_string = () => Math.random().toString(36).slice(2);
