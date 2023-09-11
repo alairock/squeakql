@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 16
       - run: bun test
-      - run: bun build ./src/index.ts --outdir ./build
+      - run: bun run bun.ts
 
   publish-npm:
     needs: build
