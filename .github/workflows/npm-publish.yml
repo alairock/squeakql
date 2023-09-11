@@ -22,17 +22,28 @@ jobs:
       - run: bun install
       - run: bun test
       - run: bun run bun.ts
+      - name: Upload build directory
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-directory
+          path: ./build
 
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Download build directory
+        uses: actions/download-artifact@v2
+        with:
+          name: build-directory
+          path: ./build
       - uses: actions/setup-node@v3
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
       - run: npm ci
+      - run: npm version patch -m "Bump version to %s"
       - run: npm publish
         working-directory: ./build
         env:
