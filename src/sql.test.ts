@@ -260,4 +260,10 @@ describe("sql tag template", function () {
       "SELECT one,two FROM test WHERE id IN ('a','b','c')"
     );
   });
+  it("select with multiple conditions with IN", async () => {
+    const ids = ["a", "b", "c"];
+    expect(sql`SELECT * FROM test WHERE id IN @${ids}`.render()).toBe(
+      "SELECT * FROM test WHERE id IN ('a','b','c')"
+    );
+  });
 });
