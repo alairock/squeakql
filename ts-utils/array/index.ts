@@ -1,17 +1,16 @@
-export {arrayCompare} from './array-compare'
-export {arrayDelete} from './array-delete'
-export {arrayDiff} from './array-diff'
-export {arrayDiffShallow} from './array-diff-shallow'
-export {arrayDistinct} from './array-distinct'
-export {arrayEnsure, keyObjArray} from './array-ensure'
-export {arrayFill} from './array-fill'
-export {arrayFlatten} from './array-flatten'
-export {arrayGroupBy} from './array-group-by'
-export {arrayInsert} from './array-insert'
-export {arrayMove} from './array-move'
-export {arrayRandomSample} from './array-random-sample'
-export {arrayShuffle} from './array-shuffle'
-export {arraySortPure} from './array-sort-pure'
-export {arraySort} from './array-sort'
-export {arrayToMap} from './array-to-map'
-export {arrayTransposeMatrix} from './array-transpose-matrix'
+export { arrayCompare } from "./array-compare";
+export { arrayDelete } from "./array-delete";
+export { arrayDiff } from "./array-diff";
+export { arrayDiffShallow } from "./array-diff-shallow";
+export { arrayDistinct } from "./array-distinct";
+export { arrayEnsure, keyObjArray } from "./array-ensure";
+export { arrayFill } from "./array-fill";
+export { arrayFlatten } from "./array-flatten";
+export { arrayGroupBy } from "./array-group-by";
+export { arrayInsert } from "./array-insert";
+export { arrayMove } from "./array-move";
+export { arrayRandomSample } from "./array-random-sample";
+export { arrayShuffle } from "./array-shuffle";
+export { arraySort } from "./array-sort";
+export { arrayToMap } from "./array-to-map";
+export { arrayTransposeMatrix } from "./array-transpose-matrix";

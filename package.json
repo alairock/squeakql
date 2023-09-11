@@ -1,9 +1,11 @@
 {
   "name": "squeakql",
   "version": "0.0.1",
-  "module": "./build/index.js",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "type": "module",
   "devDependencies": {
+    "bun-plugin-dts": "^0.1.0",
     "bun-types": "latest"
   },
   "peerDependencies": {

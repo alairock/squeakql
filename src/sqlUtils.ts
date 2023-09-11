@@ -6,7 +6,7 @@ import {
   isObject,
   isString,
   keyObjArray,
-  objectPrune as pruneObject,
+  pruneObject,
 } from "../ts-utils";
 
 type Dictionary<T = any> = Record<string, T>;
@@ -17,7 +17,7 @@ export const values = <T = Dictionary>(
   noVal = false
 ) => {
   const valsArray = ensureArray(vals);
-  const trimmedValsArray = valsArray.map((e) => pruneObject(e));
+  const trimmedValsArray = valsArray.map((e) => pruneObject(e as any));
   const keys = keyObjArray(trimmedValsArray);
   return `${prefixKeys ? `(${keys.join(",")})` : ""} VALUES ${trimmedValsArray
     .map(
