@@ -4,6 +4,7 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "type": "module",
+  "files": ["build/*"],
   "devDependencies": {
     "bun-plugin-dts": "^0.1.0",
     "bun-types": "latest"
