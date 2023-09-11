@@ -66,11 +66,14 @@ export class SQLQuery {
 
   private _internalRender(filtered = false): string {
     let count = 0;
-    return this._repr.replace(/\s+/g, " ").replace(/\$\?/g, () => {
-      const str = filtered ? `$${count + 1}` : this._values[count];
-      count++;
-      return str;
-    });
+    return this._repr
+      .replace(/\s+/g, " ")
+      .replace(/\$\?/g, () => {
+        const str = filtered ? `$${count + 1}` : this._values[count];
+        count++;
+        return str;
+      })
+      .trim();
   }
 
   public replace(str: string, result: string) {}

@@ -171,10 +171,16 @@ describe("sql tag template", function () {
 
   describe("helper functions", () => {
     it("merge() works", async () => {
-      const queries = [sql`test`, sql`:${"nice"}`, sql`${123}`];
-      const query = sql.merge(queries);
+      let andTestInjection = "pg_authid' OR 1=1";
+      const queries = [
+        sql`test`,
+        sql`:${"nice"}`,
+        sql`${123}`,
+        sql`AND ${andTestInjection}`,
+      ];
+      const query = sql.merge(queries, sql`, `);
 
-      expect(query.render()).toBe("test,nice,123");
+      expect(query.render()).toBe("test, nice, 123, AND 'pg_authid'' OR 1=1'");
     });
     it("merge() works with empty array", async () => {
       const queries: SQLQuery[] = [];
