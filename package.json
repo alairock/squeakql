@@ -1,6 +1,7 @@
 {
   "name": "squeakql",
-  "module": "index.ts",
+  "version": "0.0.1",
+  "module": "./build/index.js",
   "type": "module",
   "devDependencies": {
     "bun-types": "latest"
