@@ -3,7 +3,6 @@ import {
   arrayEnsure as ensureArray,
   keyObjArray,
 } from "../ts-utils/array/array-ensure";
-import { dbQuery } from "./db";
 import { objectPrune as pruneObject } from "../ts-utils/object/object-prune";
 
 /** HELPERS */
@@ -98,7 +97,7 @@ sql.updateMany = async <
   table: string,
   vals: Dictionary<K>,
   arrayType?: SqueakqlQuery
-): Promise<T[]> => {
+) => {
   let columns = [];
   let columns_set = false;
   let all_vals = [];
@@ -139,5 +138,5 @@ sql.updateMany = async <
     columns.map((c) => sql`:${c}`)
   )}) WHERE d.id=v.id`;
 
-  return await dbQuery(query);
+  return query;
 };

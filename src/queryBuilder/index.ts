@@ -10,9 +10,14 @@ export class BaseTable {
     public joinColumn: string = "id"
   ) {}
 }
+
 /** HELPERS */
 type Dictionary<T = any> = Record<string, T>;
 
+/**
+ * A class representing a query builder for Squeakql.
+ * This can only build SELECT queries.
+ */
 export class QueryBuilder {
   public baseTable: BaseTable;
   public columns: SqueakqlQuery[] = [];
