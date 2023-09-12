@@ -138,7 +138,11 @@ export class QueryBuilder {
   }
 
   private compileColumns(): SqueakqlQuery {
-    return this.columns.length ? sql.merge(this.columns) : sql`t.*`;
+    let cols = this.columns.length ? sql.merge(this.columns) : sql`t.*`;
+    if (this.withCount) {
+      cols = sql`${cols}, COUNT(*) OVER() AS record_count`;
+    }
+    return cols;
   }
 
   private compileWhereClause(): SqueakqlQuery {

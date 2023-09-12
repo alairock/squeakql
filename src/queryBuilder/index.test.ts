@@ -93,4 +93,12 @@ describe("RecordQueryBuilder", () => {
       "SELECT (a = '1') AS filters FROM ONLY test AS t"
     );
   });
+  // test a query that counts the number of records in a table
+  it("withCount() works", async () => {
+    const qb = newQueryBuilder();
+    qb.withCount = true;
+    expect(qb.compile().render()).toBe(
+      "SELECT t.*, COUNT(*) OVER() AS record_count FROM ONLY test AS t"
+    );
+  });
 });
