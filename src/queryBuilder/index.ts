@@ -6,14 +6,14 @@ export class BaseTable {
   constructor(
     public tableName: string | SqueakqlQuery,
     public alias: string,
-    public qb: RecordQueryBuilder,
+    public qb: QueryBuilder,
     public joinColumn: string = "id"
   ) {}
 }
 /** HELPERS */
 type Dictionary<T = any> = Record<string, T>;
 
-export class RecordQueryBuilder {
+export class QueryBuilder {
   public baseTable: BaseTable;
   public columns: SqueakqlQuery[] = [];
   private whereClauses: SqueakqlQuery[] = [];
@@ -78,7 +78,7 @@ export class RecordQueryBuilder {
     this.joins.push(sqlJoinClause);
   }
 
-  stealWithsFrom(qb: RecordQueryBuilder) {
+  stealWithsFrom(qb: QueryBuilder) {
     this.withs = { ...qb.withs, ...this.withs };
     qb.withs = {};
   }
@@ -127,74 +127,96 @@ export class RecordQueryBuilder {
     this.havingClauses = [];
   }
 
-  compile(withBaseAlias = false): SqueakqlQuery {
-    this.joinedTables["base"] = this.baseTable;
-    let columns = this.columns?.length ? sql.merge(this.columns) : sql`t.*`;
-    let withClause = Object.keys(this.withs).length
+  private compileWithClause(): SqueakqlQuery {
+    return Object.keys(this.withs).length
       ? sql`WITH ${sql.merge(
           Object.keys(this.withs).map(
             (n) => sql`:${n} AS MATERIALIZED (${this.withs[n]})`
           )
         )} `
       : sql``;
-    Object.keys(this.withs).map((n) => {
-      if (n != this.baseTable.tableName) {
-        this.joinTables(this.baseTable, new BaseTable(n, n, this), "id");
-      }
-    });
+  }
 
-    let distinctClause = this.distincts.length
-      ? sql`DISTINCT ON (${sql.merge(this.distincts)}) `
-      : sql``;
-    let searchClause = this.searchClauses?.length
+  private compileColumns(): SqueakqlQuery {
+    return this.columns.length ? sql.merge(this.columns) : sql`t.*`;
+  }
+
+  private compileWhereClause(): SqueakqlQuery {
+    const searchClause = this.searchClauses?.length
       ? sql`${sql.merge(
           this.searchClauses.map((s) => sql`(${s})`),
           sql` OR `
         )}`
       : null;
+
     if (searchClause) this.whereClauses.push(searchClause);
 
-    let whereClause = this.whereClauses?.length
+    return this.whereClauses?.length
       ? sql`WHERE ${sql.merge(
           this.whereClauses.map((w) => sql`(${w})`),
           sql` AND `
         )}`
       : sql``;
-    let havingClause = this.havingClauses?.length
+  }
+  private compileGroupBy(): SqueakqlQuery {
+    return this.groupBy.length
+      ? sql`GROUP BY ${sql.merge(this.groupBy)}`
+      : sql``;
+  }
+
+  private compileHavingClause(): SqueakqlQuery {
+    return this.havingClauses.length
       ? sql`HAVING ${sql.merge(
           this.havingClauses.map((h) => sql`(${h})`),
           sql` AND `
         )}`
       : sql``;
-    let groupByClause = this.groupBy?.length
-      ? sql`GROUP BY ${sql.merge(this.groupBy)}`
-      : sql``;
-    let sortClause = this.orderBys?.length
+  }
+
+  private compileOrderBy(): SqueakqlQuery {
+    return this.orderBys.length
       ? sql`ORDER BY ${sql.merge(this.orderBys)}`
       : sql``;
-    let limitClause = this.limit ? sql`LIMIT ${this.limit}` : sql``;
-    if (this.withCount) {
-      columns = sql`${columns}, count(*) OVER() AS record_count`;
-    }
-    let joinClause = this.joins?.length ? sql.merge(this.joins, sql` `) : sql``;
+  }
 
-    let tableClause =
-      this.baseTable.tableName instanceof SqueakqlQuery
-        ? this.baseTable.tableName
-        : sql`ONLY :${this.baseTable.tableName}`;
-    let alias = withBaseAlias ? sql`:${this.baseTable.alias}` : sql`t`;
+  private compileLimit(): SqueakqlQuery {
+    return this.limit ? sql`LIMIT ${this.limit}` : sql``;
+  }
 
-    const clauses = [
-      joinClause,
-      whereClause,
-      groupByClause,
-      havingClause,
-      sortClause,
-      limitClause,
-    ];
-    const nonEmptyClauses = clauses.filter(
-      (clause) => clause._repr.trim() !== ""
-    );
+  private compileJoins(): SqueakqlQuery {
+    return this.joins.length ? sql.merge(this.joins, sql` `) : sql``;
+  }
+
+  private compileDistinctClause(): SqueakqlQuery {
+    return this.distincts.length
+      ? sql`DISTINCT ON (${sql.merge(this.distincts)}) `
+      : sql``;
+  }
+
+  compile(withBaseAlias = false): SqueakqlQuery {
+    const withClause = this.compileWithClause();
+    const columns = this.compileColumns();
+    const distinctClause = this.compileDistinctClause();
+    const whereClause = this.compileWhereClause();
+    const groupByClause = this.compileGroupBy();
+    const havingClause = this.compileHavingClause();
+    const orderBy = this.compileOrderBy();
+    const limit = this.compileLimit();
+    const joins = this.compileJoins();
+    const tableClause =
+      typeof this.baseTable.tableName === "string"
+        ? sql`ONLY :${this.baseTable.tableName}`
+        : this.baseTable.tableName;
+    const alias = withBaseAlias ? sql`:${this.baseTable.alias}` : sql`t`;
+
+    let nonEmptyClauses = [];
+
+    if (joins._repr.trim() !== "") nonEmptyClauses.push(joins);
+    if (whereClause._repr.trim() !== "") nonEmptyClauses.push(whereClause);
+    if (groupByClause._repr.trim() !== "") nonEmptyClauses.push(groupByClause);
+    if (havingClause._repr.trim() !== "") nonEmptyClauses.push(havingClause);
+    if (orderBy._repr.trim() !== "") nonEmptyClauses.push(orderBy);
+    if (limit._repr.trim() !== "") nonEmptyClauses.push(limit);
 
     return sql`${withClause}SELECT ${distinctClause}${columns} FROM ${tableClause} AS ${alias} ${sql.merge(
       nonEmptyClauses,

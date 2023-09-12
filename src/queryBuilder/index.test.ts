@@ -1,9 +1,9 @@
 import { it, describe, expect } from "bun:test";
-import { RecordQueryBuilder } from ".";
+import { QueryBuilder } from ".";
 import { sql } from "../string-literal";
 
 function newQueryBuilder() {
-  return new RecordQueryBuilder("test");
+  return new QueryBuilder("test");
 }
 
 describe("RecordQueryBuilder", () => {
@@ -52,13 +52,14 @@ describe("RecordQueryBuilder", () => {
     );
   });
 
-  // it("addWithClause() works", async () => {
-  //   const qb = newQueryBuilder();
-  //   qb.addWithClause("subqueryName", sql`SELECT 1`);
-  //   expect(qb.compile().render()).toBe(
-  //     "WITH subqueryName AS MATERIALIZED (SELECT 1) SELECT t.* FROM ONLY test AS t"
-  //   );
-  // });
+  it("addWithClause() works", async () => {
+    const qb = newQueryBuilder();
+    qb.addSelectableColumn("*");
+    qb.addWithClause("subqueryName", sql`SELECT 1`);
+    expect(qb.compile().render()).toBe(
+      "WITH subqueryName AS MATERIALIZED (SELECT 1) SELECT * FROM ONLY test AS t"
+    );
+  });
 
   it("addDistinctColumn() works", async () => {
     const qb = newQueryBuilder();
