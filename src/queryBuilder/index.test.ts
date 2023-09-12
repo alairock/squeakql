@@ -1,5 +1,5 @@
 import { it, describe, expect } from "bun:test";
-import { QueryBuilder } from ".";
+import { BaseTable, QueryBuilder } from ".";
 import { sql } from "../string-literal";
 
 function newQueryBuilder() {
@@ -99,6 +99,58 @@ describe("RecordQueryBuilder", () => {
     qb.withCount = true;
     expect(qb.compile().render()).toBe(
       "SELECT t.*, COUNT(*) OVER() AS record_count FROM ONLY test AS t"
+    );
+  });
+
+  it("addRawJoin() works", async () => {
+    const qb = newQueryBuilder();
+    qb.addRawJoin(sql`JOIN table2 ON table1.id = table2.id`);
+    expect(qb.compile().render()).toBe(
+      "SELECT t.* FROM ONLY test AS t JOIN table2 ON table1.id = table2.id"
+    );
+  });
+
+  it("stealWithsFrom() works", async () => {
+    const qb1 = newQueryBuilder();
+    const qb2 = newQueryBuilder();
+    qb1.addWithClause("subquery1", sql`SELECT 1`);
+    qb2.stealWithsFrom(qb1);
+    expect(qb2.compile().render()).toBe(
+      "WITH subquery1 AS MATERIALIZED (SELECT 1) SELECT t.* FROM ONLY test AS t"
+    );
+  });
+
+  it("compileWithClause() works for empty withs", async () => {
+    const qb = newQueryBuilder();
+    expect(qb.compile().render()).toBe("SELECT t.* FROM ONLY test AS t");
+  });
+
+  it("compileLimit() works", async () => {
+    const qb = newQueryBuilder();
+    qb.limit = 10;
+    expect(qb.compile().render()).toBe(
+      "SELECT t.* FROM ONLY test AS t LIMIT 10"
+    );
+  });
+
+  it("addMultipleWhereClauses() works", async () => {
+    const qb = newQueryBuilder();
+    qb.addWhereClause(sql`a = 1`);
+    qb.addWhereClause(sql`b = 2`);
+    expect(qb.compile().render()).toBe(
+      "SELECT t.* FROM ONLY test AS t WHERE (a = 1) AND (b = 2)"
+    );
+  });
+
+  // Test for multiple joinTables with different aliases
+  it("joinTables() with different aliases works", async () => {
+    const qb = newQueryBuilder();
+    const tableB = new BaseTable("table2", "b", qb);
+    const tableC = new BaseTable("table2", "c", qb);
+    qb.joinTables(qb.baseTable, tableB, "column");
+    qb.joinTables(qb.baseTable, tableC, "column");
+    expect(qb.compile().render()).toBe(
+      "SELECT t.* FROM ONLY test AS t LEFT JOIN ONLY table2 b ON t.id = b.column LEFT JOIN ONLY table2 c ON t.id = c.column"
     );
   });
 });
