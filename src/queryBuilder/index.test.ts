@@ -1,6 +1,7 @@
 import { it, describe, expect } from "bun:test";
 import { BaseTable, QueryBuilder } from ".";
 import { sql } from "../string-literal";
+import { insert } from "../utils";
 
 function newQueryBuilder() {
   return new QueryBuilder("test");
@@ -151,6 +152,24 @@ describe("RecordQueryBuilder", () => {
     qb.joinTables(qb.baseTable, tableC, "column");
     expect(qb.compile().render()).toBe(
       "SELECT t.* FROM ONLY test AS t LEFT JOIN ONLY table2 b ON t.id = b.column LEFT JOIN ONLY table2 c ON t.id = c.column"
+    );
+  });
+
+  it("compiles to correct select, advanced", async () => {
+    const qb = newQueryBuilder();
+    qb.baseTable.tableName = "Orders";
+    qb.baseTable.alias = "o";
+    qb.addSelectableColumn("*");
+
+    const qb2 = newQueryBuilder();
+    qb2.baseTable.tableName = "Users";
+    qb2.baseTable.alias = "u";
+    qb2.addSelectableColumn("user_id");
+    qb2.addWhereClause(sql`username = 'johndoe'`);
+
+    qb.addWhereClause(sql`user_id = (${qb2.compile(true)})`);
+    expect(qb.compile(true).render()).toBe(
+      "SELECT * FROM ONLY Orders AS o WHERE (user_id = (SELECT user_id FROM ONLY Users AS u WHERE (username = 'johndoe')))"
     );
   });
 });
