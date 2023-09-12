@@ -74,3 +74,45 @@ Will return a properly escaped query:
 - sql.updateMany()
 
 ## Query Builder
+
+Use query builder to build sql selects:
+
+```js
+import { sql } from "squeakql";
+
+qb = new QueryBuilder("table_name");
+console.log(qb.compile().render());
+// returns> SELECT t.* FROM ONLY table_name AS t
+```
+
+Use for out-of-order query building
+
+```js
+qb = new QueryBuilder("table_name");
+qb.addOrderBy(sql`created_ts DESC`);
+qb.addWhereClause(sql`a = ${one}`);
+qb.addSelectableColumn("created_ts");
+console.log(qb.compile().render());
+```
+
+### query builder functions
+
+```js
+qb.addSelectableColumn(column: string | SqueakqlQuery, as?: string)
+qb.addWhereClause(clause: SqueakqlQuery)
+qb.addHavingClause(clause: SqueakqlQuery)
+qb.addWithClause(name: string, clause: SqueakqlQuery)
+qb.addDistinctColumn(column: string | SqueakqlQuery)
+qb.addSearchTerm(clause: SqueakqlQuery) // basically a where clause, but gets "OR"d
+qb.addOrderBy(orderBy: SqueakqlQuery)
+qb.addRawJoin(sqlJoinClause: SqueakqlQuery)
+qb.joinTables(
+    tableA: BaseTable,
+    tableB: BaseTable,
+    joinColumnOfTableB: string,
+    useLeft = true
+  )
+qb.addGroupBy(groupByClause: SqueakqlQuery)
+qb.baseTable.tableName // "table_name"
+qb.baseTable.alias // "t"
+```

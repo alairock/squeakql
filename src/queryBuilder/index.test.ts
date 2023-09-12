@@ -8,6 +8,18 @@ function newQueryBuilder() {
 }
 
 describe("RecordQueryBuilder", () => {
+  it("basic query works", async () => {
+    const qb = new QueryBuilder("test", "z");
+    expect(qb.compile().render()).toBe("SELECT z.* FROM ONLY test AS z");
+
+    const qb2 = newQueryBuilder();
+    qb2.addSelectableColumn("column1");
+    qb2.addOrderBy(sql`column1 DESC`);
+    expect(qb2.compile().render()).toBe(
+      "SELECT column1 FROM ONLY test AS t ORDER BY column1 DESC"
+    );
+  });
+
   it("constructor() works", async () => {
     const qb = newQueryBuilder();
     expect(qb.baseTable.alias).toBe("t");

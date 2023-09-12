@@ -34,8 +34,13 @@ export class QueryBuilder {
   public limit: number | undefined;
   public withCount: boolean = false;
 
-  constructor(baseTable: string) {
-    this.baseTable = new BaseTable(baseTable, "t", this);
+  constructor(baseTable: string, public alias = "t") {
+    if (alias != "t" && alias.length > 1) {
+      throw new Error(
+        "Alias must be a single character, or 't' for the base table"
+      );
+    }
+    this.baseTable = new BaseTable(baseTable, alias, this);
   }
 
   addSelectableColumn(column: string | SqueakqlQuery, as?: string) {
@@ -143,7 +148,9 @@ export class QueryBuilder {
   }
 
   private compileColumns(): SqueakqlQuery {
-    let cols = this.columns.length ? sql.merge(this.columns) : sql`t.*`;
+    let cols = this.columns.length
+      ? sql.merge(this.columns)
+      : sql`:${this.alias}.*`;
     if (this.withCount) {
       cols = sql`${cols}, COUNT(*) OVER() AS record_count`;
     }
@@ -216,7 +223,9 @@ export class QueryBuilder {
       typeof this.baseTable.tableName === "string"
         ? sql`ONLY :${this.baseTable.tableName}`
         : this.baseTable.tableName;
-    const alias = withBaseAlias ? sql`:${this.baseTable.alias}` : sql`t`;
+    const alias = withBaseAlias
+      ? sql`:${this.baseTable.alias}`
+      : sql`:${this.alias}`;
 
     let nonEmptyClauses = [];
 
