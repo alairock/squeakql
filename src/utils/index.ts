@@ -7,7 +7,7 @@ import {
   isString,
   keyObjArray,
   pruneObject,
-} from "../ts-utils";
+} from "../../ts-utils";
 
 type Dictionary<T = any> = Record<string, T>;
 

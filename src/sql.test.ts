@@ -1,10 +1,10 @@
 import { it, describe, expect } from "bun:test";
-import { insert } from "./sqlUtils";
-import { SQLQuery } from "./sqlQuery";
-import { sql } from "./sql";
+import { insert } from "./utils";
+import { SqueakqlQuery } from "./query";
+import { sql } from "./string-literal";
 
 const db = {
-  query: async (queryStr: SQLQuery, tags: any) => {
+  query: async (queryStr: SqueakqlQuery, tags: any) => {
     return {
       rows: [],
       rowCount: 0,
@@ -44,7 +44,7 @@ describe("sql insert() helper", () => {
 describe("sql tag template", function () {
   it("returns a SqlQuery Object", function () {
     let s = sql`hello`;
-    expect(s).toBeInstanceOf(SQLQuery);
+    expect(s).toBeInstanceOf(SqueakqlQuery);
   });
   it("Has no values", function () {
     let s = sql`hello`;
@@ -183,7 +183,7 @@ describe("sql tag template", function () {
       expect(query.render()).toBe("test, nice, 123, AND 'pg_authid'' OR 1=1'");
     });
     it("merge() works with empty array", async () => {
-      const queries: SQLQuery[] = [];
+      const queries: SqueakqlQuery[] = [];
       const query = sql.merge(queries);
 
       expect(query.render()).toBe("");

@@ -1,4 +1,4 @@
-import { SQLQuery } from "./sqlQuery";
+import { SqueakqlQuery } from "../query";
 
 const getRequestContext = () => {
   // TODO: This is a stub, replace this with a real implementation
@@ -12,7 +12,7 @@ const getRequestContext = () => {
       },
     },
     db: {
-      query: async (queryStr: SQLQuery, tags: any) => {
+      query: async (queryStr: SqueakqlQuery, tags: any) => {
         return {
           rows: [],
         };
@@ -24,7 +24,7 @@ const getRequestContext = () => {
   };
 };
 
-export async function dbQuery<T = any>(queryStr: SQLQuery): Promise<T[]> {
+export async function dbQuery<T = any>(queryStr: SqueakqlQuery): Promise<T[]> {
   const ctx = getRequestContext();
   let tags = {
     application: "TODO: INSERT APPLICATION NAME HERE",
@@ -38,7 +38,7 @@ export async function dbQuery<T = any>(queryStr: SQLQuery): Promise<T[]> {
     });
   let result = (await ctx.db.query(queryStr, tags)).rows;
   if (!dbSpan) {
-  } else if (queryStr instanceof SQLQuery)
+  } else if (queryStr instanceof SqueakqlQuery)
     dbSpan.setData("query", queryStr.toString());
   if (dbSpan) dbSpan.finish();
   return result;

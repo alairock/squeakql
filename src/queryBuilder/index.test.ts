@@ -1,6 +1,6 @@
 import { it, describe, expect } from "bun:test";
 import { RecordQueryBuilder } from ".";
-import { sql } from "../sql";
+import { sql } from "../string-literal";
 
 function newQueryBuilder() {
   return new RecordQueryBuilder("test");

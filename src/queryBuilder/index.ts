@@ -1,10 +1,10 @@
-import { SQLQuery } from "../sqlQuery";
-import { sql } from "../sql";
-import { uuid } from "../sqlUtils";
+import { SqueakqlQuery } from "../query";
+import { sql } from "../string-literal";
+import { uuid } from "../utils";
 
 export class BaseTable {
   constructor(
-    public tableName: string | SQLQuery,
+    public tableName: string | SqueakqlQuery,
     public alias: string,
     public qb: RecordQueryBuilder,
     public joinColumn: string = "id"
@@ -15,17 +15,17 @@ type Dictionary<T = any> = Record<string, T>;
 
 export class RecordQueryBuilder {
   public baseTable: BaseTable;
-  public columns: SQLQuery[] = [];
-  private whereClauses: SQLQuery[] = [];
-  private havingClauses: SQLQuery[] = [];
-  private searchClauses: SQLQuery[] = [];
-  private orderBys: SQLQuery[] = [];
-  protected withs: Dictionary<SQLQuery> = {};
-  private groupBy: SQLQuery[] = [];
-  private joins: SQLQuery[] = [];
+  public columns: SqueakqlQuery[] = [];
+  private whereClauses: SqueakqlQuery[] = [];
+  private havingClauses: SqueakqlQuery[] = [];
+  private searchClauses: SqueakqlQuery[] = [];
+  private orderBys: SqueakqlQuery[] = [];
+  protected withs: Dictionary<SqueakqlQuery> = {};
+  private groupBy: SqueakqlQuery[] = [];
+  private joins: SqueakqlQuery[] = [];
   private joinedTables: Dictionary<BaseTable> = {};
   private joinedTableAliases: Dictionary<BaseTable> = {};
-  private distincts: SQLQuery[] = [];
+  private distincts: SqueakqlQuery[] = [];
   public limit: number | undefined;
   public withCount: boolean = false;
 
@@ -33,7 +33,7 @@ export class RecordQueryBuilder {
     this.baseTable = new BaseTable(baseTable, "t", this);
   }
 
-  addSelectableColumn(column: string | SQLQuery, as?: string) {
+  addSelectableColumn(column: string | SqueakqlQuery, as?: string) {
     let sqlColumn;
     if (typeof column === "string") sqlColumn = sql`:${column}`;
     else sqlColumn = column;
@@ -43,38 +43,38 @@ export class RecordQueryBuilder {
     }
   }
 
-  addWhereClause(clause: SQLQuery) {
+  addWhereClause(clause: SqueakqlQuery) {
     this.whereClauses.push(clause);
   }
 
-  addHavingClause(clause: SQLQuery) {
+  addHavingClause(clause: SqueakqlQuery) {
     this.havingClauses.push(clause);
   }
 
-  addWithClause(name: string, clause: SQLQuery) {
+  addWithClause(name: string, clause: SqueakqlQuery) {
     if (!(name in this.withs)) {
       this.withs[name] = clause;
     }
   }
 
-  addDistinctColumn(column: string | SQLQuery) {
-    let query = column as SQLQuery;
+  addDistinctColumn(column: string | SqueakqlQuery) {
+    let query = column as SqueakqlQuery;
     if (typeof column === "string") {
       query = sql`:${column}`;
     }
     this.distincts.push(query);
   }
 
-  addSearchTerm(clause: SQLQuery) {
+  addSearchTerm(clause: SqueakqlQuery) {
     // basically a where clause, but gets "OR"d
     this.searchClauses.push(clause);
   }
 
-  addOrderBy(orderBy: SQLQuery) {
+  addOrderBy(orderBy: SqueakqlQuery) {
     this.orderBys.push(orderBy);
   }
 
-  addRawJoin(sqlJoinClause: SQLQuery) {
+  addRawJoin(sqlJoinClause: SqueakqlQuery) {
     this.joins.push(sqlJoinClause);
   }
 
@@ -106,7 +106,7 @@ export class RecordQueryBuilder {
     }
   }
 
-  addGroupBy(groupByClause: SQLQuery) {
+  addGroupBy(groupByClause: SqueakqlQuery) {
     if (!this.groupBy.includes(groupByClause)) this.groupBy.push(groupByClause);
   }
 
@@ -127,7 +127,7 @@ export class RecordQueryBuilder {
     this.havingClauses = [];
   }
 
-  compile(withBaseAlias = false): SQLQuery {
+  compile(withBaseAlias = false): SqueakqlQuery {
     this.joinedTables["base"] = this.baseTable;
     let columns = this.columns?.length ? sql.merge(this.columns) : sql`t.*`;
     let withClause = Object.keys(this.withs).length
@@ -179,7 +179,7 @@ export class RecordQueryBuilder {
     let joinClause = this.joins?.length ? sql.merge(this.joins, sql` `) : sql``;
 
     let tableClause =
-      this.baseTable.tableName instanceof SQLQuery
+      this.baseTable.tableName instanceof SqueakqlQuery
         ? this.baseTable.tableName
         : sql`ONLY :${this.baseTable.tableName}`;
     let alias = withBaseAlias ? sql`:${this.baseTable.alias}` : sql`t`;

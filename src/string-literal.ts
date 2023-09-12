@@ -1,9 +1,9 @@
-import { SQLQuery } from "./sqlQuery";
+import { SqueakqlQuery } from "./query";
 import {
   arrayEnsure as ensureArray,
   keyObjArray,
 } from "../ts-utils/array/array-ensure";
-import { dbQuery } from "./dbUtils";
+import { dbQuery } from "./db";
 import { objectPrune as pruneObject } from "../ts-utils/object/object-prune";
 
 /** HELPERS */
@@ -11,11 +11,11 @@ type Dictionary<T = any> = Record<string, T>;
 
 /** sql string literal */
 export function sql(literals: TemplateStringsArray, ...values: any[]) {
-  return new SQLQuery(Array.from(literals), values);
+  return new SqueakqlQuery(Array.from(literals), values);
 }
 
 const __internalsql = (literals: string[], values: any[]) =>
-  new SQLQuery(literals, values);
+  new SqueakqlQuery(literals, values);
 
 sql.basicSelect = (
   table: string,
@@ -44,10 +44,10 @@ sql.unsafe = (text: string) => {
       / use it with other sql strings.
       */
   // @ts-ignore
-  return new SQLQuery([text], []);
+  return new SqueakqlQuery([text], []);
 };
 
-sql.merge = (queries: SQLQuery[], joinOn = sql`,`) => {
+sql.merge = (queries: SqueakqlQuery[], joinOn = sql`,`) => {
   if (queries.length === 0) {
     return sql``;
   }
@@ -97,7 +97,7 @@ sql.updateMany = async <
 >(
   table: string,
   vals: Dictionary<K>,
-  arrayType?: SQLQuery
+  arrayType?: SqueakqlQuery
 ): Promise<T[]> => {
   let columns = [];
   let columns_set = false;

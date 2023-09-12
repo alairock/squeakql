@@ -1,6 +1,6 @@
 import { isDate } from "../ts-utils";
 
-export class SQLQuery {
+export class SqueakqlQuery {
   _repr: string;
   _values: string[];
 
@@ -16,7 +16,7 @@ export class SQLQuery {
       let val = values[i];
       if (str.slice(-1) === ":") {
         // val needs to be a literal
-        val = SQLQuery.validateLiteral(val);
+        val = SqueakqlQuery.validateLiteral(val);
         this._repr += str.slice(0, -1) + val;
       } else {
         let tupleNotation = false;
@@ -33,8 +33,8 @@ export class SQLQuery {
     }
   }
 
-  static validateLiteral(val: string | SQLQuery) {
-    if (val instanceof SQLQuery) {
+  static validateLiteral(val: string | SqueakqlQuery) {
+    if (val instanceof SqueakqlQuery) {
       if (val._values.length != 0) {
         throw new TypeError(
           "Cannot turn nested sql tag template into a " +
@@ -102,17 +102,17 @@ export class SQLQuery {
           .map((v) => this._sqlizeValue(v, tupleNotation))
           .toString()})`;
       } else {
-        return `'{${SQLQuery._escapeVal(val).slice(1, -1)}}'`;
+        return `'{${SqueakqlQuery._escapeVal(val).slice(1, -1)}}'`;
       }
     } else if (typeof val === "object") {
-      return SQLQuery._escapeVal(JSON.stringify(val));
+      return SqueakqlQuery._escapeVal(JSON.stringify(val));
     } else {
-      return SQLQuery._escapeVal(val);
+      return SqueakqlQuery._escapeVal(val);
     }
   }
 
   private _addVal(val: any, tupleNotation = false) {
-    if (val instanceof SQLQuery) {
+    if (val instanceof SqueakqlQuery) {
       for (const v of val._values) {
         this._values.push(v);
       }
